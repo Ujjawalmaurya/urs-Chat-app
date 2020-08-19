@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "833370693445",
+    "firebase_url": "https://chat-6e631.firebaseio.com",
+    "project_id": "chat-6e631",
+    "storage_bucket": "chat-6e631.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:833370693445:android:e84b423f6049f7db77282c",
+        "android_client_info": {
+          "package_name": "com.ujjawal.chat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "833370693445-g169ns26ureusecrmvl7pl5arej8v4r8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAAQLjitqaz1EUAzMWtANFaoBnbE3OUmQo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "833370693445-g169ns26ureusecrmvl7pl5arej8v4r8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
