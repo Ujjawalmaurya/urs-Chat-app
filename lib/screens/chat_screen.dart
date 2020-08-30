@@ -10,6 +10,7 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  final clearMessage = TextEditingController();
   final _firestore = Firestore.instance;
   final _auth = FirebaseAuth.instance;
   FirebaseUser loggedInUser;
@@ -33,21 +34,6 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  // void getMessages() async {
-  //   final messages = await _firestore.collection('messages').getDocuments();
-  //   for (var message in messages.documents) {
-  //     print(message.data);
-  //   }
-  // }
-
-  void messagesStream() async {
-    await for (var snapshot in _firestore.collection('messages').snapshots()) {
-      for (var message in snapshot.documents) {
-        print(message.data);
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,13 +43,11 @@ class _ChatScreenState extends State<ChatScreen> {
           IconButton(
               icon: Icon(Icons.close),
               onPressed: () {
-                messagesStream();
-                // getMessages();
-                // _auth.signOut();
-                // Navigator.pop(context);
+                _auth.signOut();
+                Navigator.pop(context);
               }),
         ],
-        title: Text('⚡️Chat'),
+        title: Text('Chats'),
         backgroundColor: Colors.lightBlueAccent,
       ),
       body: SafeArea(
@@ -73,26 +57,32 @@ class _ChatScreenState extends State<ChatScreen> {
           children: <Widget>[
             StreamBuilder<QuerySnapshot>(
               stream: _firestore.collection('messages').snapshots(),
-              // initialData: initialData ,
               builder: (context, snapshot) {
-                if (snapshot.hasData) {
+                if (!snapshot.hasData) {
                   return Center(
-                    child: CircularProgressIndicator(
-                      backgroundColor: Colors.yellowAccent,
-                    ),
-                  );
+                      child: CircularProgressIndicator(
+                          backgroundColor: Colors.yellowAccent));
                 }
-                final messages = snapshot.data.documents;
-                List<Text> messageWidgets = [];
+                final messages = snapshot.data.documents.reversed;
+                List<Bubble> messageWidgets = [];
                 for (var message in messages) {
                   final messageText = message.data['text'];
                   final messageSender = message.data['sender'];
-                  final messageWidget =
-                      Text('$messageText from $messageSender');
+                  final currentUser = loggedInUser.email;
+                  final messageWidget = Bubble(
+                    sender: messageSender,
+                    text: messageText,
+                    itsMeOrNot: currentUser == messageSender,
+                  );
                   messageWidgets.add(messageWidget);
                 }
-                return Column(
-                  children: messageWidgets,
+                return Expanded(
+                  child: ListView(
+                    reverse: true,
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
+                    children: messageWidgets,
+                  ),
                 );
               },
             ),
@@ -103,8 +93,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 children: <Widget>[
                   Expanded(
                     child: TextField(
+                      controller: clearMessage,
                       onChanged: (value) {
-                        //Do something with the user input.
                         messageText = value;
                       },
                       decoration: kMessageTextFieldDecoration,
@@ -112,7 +102,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                   FlatButton(
                     onPressed: () {
-                      //Implement send functionality.
+                      //send functionality
+                      clearMessage.clear(); // Clears the message
                       _firestore.collection('messages').add({
                         'text': messageText,
                         'sender': loggedInUser.email,
@@ -128,6 +119,51 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class Bubble extends StatelessWidget {
+  Bubble({this.sender, this.text, this.itsMeOrNot});
+
+  final String sender;
+  final String text;
+  final bool itsMeOrNot;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(10.0),
+      child: Column(
+        crossAxisAlignment:
+            itsMeOrNot ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          Text(
+            sender,
+            style: TextStyle(fontSize: 13.0),
+          ),
+          Material(
+            borderRadius: itsMeOrNot
+                ? BorderRadius.only(
+                    topLeft: Radius.circular(30.0),
+                    bottomLeft: Radius.circular(30.0),
+                    bottomRight: Radius.circular(30.0))
+                : BorderRadius.only(
+                    topLeft: Radius.circular(30.0),
+                    topRight: Radius.circular(30.0),
+                    bottomRight: Radius.circular(30.0)),
+            elevation: 25.0,
+            color: itsMeOrNot ? Colors.lightBlue : Colors.white60,
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+              child: Text(
+                '${text}',
+                style: TextStyle(fontSize: 20.0),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
