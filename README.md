@@ -1,4 +1,4 @@
-# Urs'chat -a cloud based massenging application
+# Urs'chat -a cloud based messaging application
 
 ## Getting Started
 
